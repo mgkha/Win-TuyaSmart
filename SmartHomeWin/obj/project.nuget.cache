@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "lHIweVxXIuxehJWTlUokG+SG0ybPMT2BjB7l1lw5bT8il7/5qUJETPwqJ1qNeX4LMrv1cuUXjCqB4lwMd6ve1Q==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\KHA\\source\\repos\\SmartHomeWin\\SmartHomeWin\\SmartHomeWin.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\KHA\\.nuget\\packages\\newtonsoft.json\\12.0.3\\newtonsoft.json.12.0.3.nupkg.sha512"
+  ],
+  "logs": []
+}
