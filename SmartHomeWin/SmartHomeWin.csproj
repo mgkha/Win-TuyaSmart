@@ -4,6 +4,7 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
+    <ApplicationIcon>cloud-storage.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>

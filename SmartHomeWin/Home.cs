@@ -90,6 +90,9 @@ namespace SmartHomeWin
 
         private void BtnRefresh_Click(object sender, EventArgs e)
         {
+            btnOnOff.Text = "ON/OFF";
+            btnOnOff.Enabled = false;
+            btnBindHotKey.Enabled = false;
             RefreshDevicesList(true);
         }
 
@@ -130,18 +133,11 @@ namespace SmartHomeWin
             {
                 if (deviceListView.SelectedItems[0].SubItems[3].Text == "1")
                 {
-                    if (deviceListView.SelectedItems[0].SubItems[2].Text == "scene")
-                    {
-                        btnOnOff.Text = "TRIGGER";
-                    }
-                    else
-                    {
-                        btnOnOff.Text = "OFF";
-                    }
+                    btnOnOff.Text = deviceListView.SelectedItems[0].SubItems[2].Text == "scene" ? "TRIGGER" : "OFF";
                 }
                 else
                 {
-                    btnOnOff.Text = "ON";
+                    btnOnOff.Text = deviceListView.SelectedItems[0].SubItems[2].Text == "scene" ? "TRIGGER" : "ON";
                 }
                 btnOnOff.Enabled = true;
                 btnBindHotKey.Enabled = true;
@@ -267,6 +263,7 @@ namespace SmartHomeWin
             WindowState = FormWindowState.Normal;
             notifyIcon.Visible = false;
         }
+
     }
 
     public class HotKeyBinding

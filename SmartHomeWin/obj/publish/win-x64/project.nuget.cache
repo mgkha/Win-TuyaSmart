@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "dgSpecHash": "Cw9Vhh6Ykb98TqZOAYHOldA/3QKaoir+jsC6t6QaJxkYIGhATliCjLRw4pEawoQh8rea4BZkAQSO8uxfCHByWA==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\KHA\\source\\repos\\SmartHomeWin\\SmartHomeWin\\SmartHomeWin.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\KHA\\.nuget\\packages\\newtonsoft.json\\12.0.3\\newtonsoft.json.12.0.3.nupkg.sha512",
+    "C:\\Users\\KHA\\.nuget\\packages\\microsoft.netcore.app.runtime.win-x64\\3.1.9\\microsoft.netcore.app.runtime.win-x64.3.1.9.nupkg.sha512",
+    "C:\\Users\\KHA\\.nuget\\packages\\microsoft.windowsdesktop.app.runtime.win-x64\\3.1.9\\microsoft.windowsdesktop.app.runtime.win-x64.3.1.9.nupkg.sha512",
+    "C:\\Users\\KHA\\.nuget\\packages\\microsoft.aspnetcore.app.runtime.win-x64\\3.1.9\\microsoft.aspnetcore.app.runtime.win-x64.3.1.9.nupkg.sha512"
+  ],
+  "logs": []
+}
