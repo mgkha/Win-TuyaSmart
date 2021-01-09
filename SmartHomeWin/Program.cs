@@ -17,11 +17,12 @@ namespace SmartHomeWin
             Application.SetHighDpiMode(HighDpiMode.SystemAware);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-
-            Application.Run(new Home
+            var home = new Home();
+            if (!System.Diagnostics.Debugger.IsAttached)
             {
-                WindowState = FormWindowState.Minimized
-            });
+                home.WindowState = FormWindowState.Minimized;
+            }
+            Application.Run(home);
 
         }
     }

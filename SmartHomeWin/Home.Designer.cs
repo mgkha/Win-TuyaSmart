@@ -36,9 +36,9 @@
             this.devType = new System.Windows.Forms.ColumnHeader();
             this.devStatus = new System.Windows.Forms.ColumnHeader();
             this.devOnline = new System.Windows.Forms.ColumnHeader();
+            this.devHotkey = new System.Windows.Forms.ColumnHeader();
             this.btnRefresh = new System.Windows.Forms.Button();
             this.btnOnOff = new System.Windows.Forms.Button();
-            this.label1 = new System.Windows.Forms.Label();
             this.btnBindHotKey = new System.Windows.Forms.Button();
             this.notifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
             this.SuspendLayout();
@@ -50,12 +50,14 @@
             this.devId,
             this.devType,
             this.devStatus,
-            this.devOnline});
+            this.devOnline,
+            this.devHotkey});
             this.deviceListView.FullRowSelect = true;
             this.deviceListView.HideSelection = false;
-            this.deviceListView.Location = new System.Drawing.Point(12, 12);
+            this.deviceListView.Location = new System.Drawing.Point(22, 18);
+            this.deviceListView.MultiSelect = false;
             this.deviceListView.Name = "deviceListView";
-            this.deviceListView.Size = new System.Drawing.Size(751, 339);
+            this.deviceListView.Size = new System.Drawing.Size(788, 339);
             this.deviceListView.TabIndex = 3;
             this.deviceListView.UseCompatibleStateImageBehavior = false;
             this.deviceListView.View = System.Windows.Forms.View.Details;
@@ -64,29 +66,36 @@
             // devName
             // 
             this.devName.Text = "Name";
-            this.devName.Width = 250;
+            this.devName.Width = 230;
             // 
             // devId
             // 
             this.devId.Text = "Device ID";
-            this.devId.Width = 250;
+            this.devId.Width = 150;
             // 
             // devType
             // 
             this.devType.Text = "Type";
-            this.devType.Width = 100;
+            this.devType.Width = 50;
             // 
             // devStatus
             // 
             this.devStatus.Text = "Status";
+            this.devStatus.Width = 50;
             // 
             // devOnline
             // 
             this.devOnline.Text = "Online";
+            this.devOnline.Width = 50;
+            // 
+            // devHotkey
+            // 
+            this.devHotkey.Text = "Hotkey";
+            this.devHotkey.Width = 230;
             // 
             // btnRefresh
             // 
-            this.btnRefresh.Location = new System.Drawing.Point(788, 12);
+            this.btnRefresh.Location = new System.Drawing.Point(828, 18);
             this.btnRefresh.Name = "btnRefresh";
             this.btnRefresh.Size = new System.Drawing.Size(100, 33);
             this.btnRefresh.TabIndex = 4;
@@ -97,7 +106,7 @@
             // btnOnOff
             // 
             this.btnOnOff.Enabled = false;
-            this.btnOnOff.Location = new System.Drawing.Point(788, 62);
+            this.btnOnOff.Location = new System.Drawing.Point(828, 66);
             this.btnOnOff.Name = "btnOnOff";
             this.btnOnOff.Size = new System.Drawing.Size(100, 33);
             this.btnOnOff.TabIndex = 4;
@@ -105,28 +114,17 @@
             this.btnOnOff.UseVisualStyleBackColor = true;
             this.btnOnOff.Click += new System.EventHandler(this.BtnOnOff_Click);
             // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point);
-            this.label1.Location = new System.Drawing.Point(240, 368);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(93, 20);
-            this.label1.TabIndex = 5;
-            this.label1.Text = "Edit Key Bind";
-            // 
             // btnBindHotKey
             // 
             this.btnBindHotKey.Enabled = false;
-            this.btnBindHotKey.Location = new System.Drawing.Point(12, 363);
+            this.btnBindHotKey.Location = new System.Drawing.Point(828, 114);
             this.btnBindHotKey.Name = "btnBindHotKey";
-            this.btnBindHotKey.Size = new System.Drawing.Size(222, 33);
+            this.btnBindHotKey.Size = new System.Drawing.Size(100, 33);
             this.btnBindHotKey.TabIndex = 6;
-            this.btnBindHotKey.Text = "[...]";
+            this.btnBindHotKey.Text = "Bind Hotkey";
             this.btnBindHotKey.UseVisualStyleBackColor = true;
             this.btnBindHotKey.Click += new System.EventHandler(this.BtnBindHotKey_Click);
             this.btnBindHotKey.KeyDown += new System.Windows.Forms.KeyEventHandler(this.BtnBindHotKey_KeyDown);
-            this.btnBindHotKey.KeyUp += new System.Windows.Forms.KeyEventHandler(this.BtnBindHotKey_KeyUp);
             // 
             // notifyIcon
             // 
@@ -138,9 +136,8 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(907, 619);
+            this.ClientSize = new System.Drawing.Size(952, 377);
             this.Controls.Add(this.btnBindHotKey);
-            this.Controls.Add(this.label1);
             this.Controls.Add(this.btnOnOff);
             this.Controls.Add(this.btnRefresh);
             this.Controls.Add(this.deviceListView);
@@ -151,7 +148,6 @@
             this.Load += new System.EventHandler(this.Home_Load);
             this.Resize += new System.EventHandler(this.Home_Resize);
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
@@ -164,9 +160,9 @@
         private System.Windows.Forms.ColumnHeader devOnline;
         private System.Windows.Forms.Button btnRefresh;
         private System.Windows.Forms.Button btnOnOff;
-        private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button btnBindHotKey;
         private System.Windows.Forms.NotifyIcon notifyIcon;
+        private System.Windows.Forms.ColumnHeader devHotkey;
     }
 }
 

@@ -6,14 +6,18 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.IO;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace SmartHomeWin
 {
     public partial class Home : Form
     {
         private readonly TuyaApi.TuyaApi tuya;
+        public static string hotkeyPath = Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile) + @"\tuya\hotkeys.json";
 
-        [DllImport("User32.dll")]
+        [DllImport("user32.dll")]
         public static extern int GetAsyncKeyState(Keys vKey);
         [DllImport("user32.dll")]
         private static extern bool RegisterHotKey(IntPtr hWnd, int id, int fsModifiers, int vk);
@@ -26,80 +30,32 @@ namespace SmartHomeWin
         {
             InitializeComponent();
 
-            // RegisterHotKey(this.Handle, 0, (int)KeyModifier.Control + (int)KeyModifier.Alt, (int)Keys.NumPad1);
-            // RegisterHotKey(this.Handle, 1, (int)KeyModifier.Control + (int)KeyModifier.Alt, (int)Keys.NumPad2);
-            // RegisterHotKey(this.Handle, 2, (int)KeyModifier.Control + (int)KeyModifier.Alt, (int)Keys.NumPad3);
-
             tuya = new TuyaApi.TuyaApi();
 
-            hotkeyBinding = new List<HotKeyBinding>
+            try
             {
-                new HotKeyBinding
-                {
-                    DevId = "38022865c82b96e4ff6e_1",
-                    Hotkey = new Hotkey
-                    {
-                        Kmod1 = KeyModifier.ControlKey,
-                        Kmod2 = KeyModifier.Menu,
-                        Key = 99,
-                    }
-                },
-                new HotKeyBinding
-                {
-                    DevId = "38022865c82b96e4ff6e_2",
-                    Hotkey = new Hotkey
-                    {
-                        Kmod1 = KeyModifier.ControlKey,
-                        Kmod2 = KeyModifier.Menu,
-                        Key = 102
-                    }
-                },
-                new HotKeyBinding
-                {
-                    DevId = "38022865c82b96e4ff6e_3",
-                    Hotkey = new Hotkey
-                    {
-                        Kmod1 = KeyModifier.ControlKey,
-                        Kmod2 = KeyModifier.Menu,
-                        Key = 105,
-                    }
-                },
-                new HotKeyBinding
-                {
-                    DevId = "38022865c82b96e50098_1",
-                    Hotkey = new Hotkey
-                    {
-                        Kmod1 = KeyModifier.ControlKey,
-                        Kmod2 = KeyModifier.Menu,
-                        Key = 98,
-                    }
-                },
-                new HotKeyBinding
-                {
-                    DevId = "38022865c82b96e50098_2",
-                    Hotkey = new Hotkey
-                    {
-                        Kmod1 = KeyModifier.ControlKey,
-                        //Kmod2 = KeyModifier.Menu,
-                        Key = 97,
-                    }
-                },
-                new HotKeyBinding
-                {
-                    DevId = "38022865c82b96e50098_3",
-                    Hotkey = new Hotkey
-                    {
-                        Kmod1 = KeyModifier.ControlKey,
-                        Kmod2 = KeyModifier.Menu,
-                        Key = 101,
-                    }
-                },
-            };
+                hotkeyBinding = JsonConvert.DeserializeObject<List<HotKeyBinding>>(File.ReadAllText(hotkeyPath));
+            }
+            catch (Exception)
+            {
+                hotkeyBinding = new List<HotKeyBinding>();
+            }
 
+            RegisterHotKey();
+        }
+
+        public void RegisterHotKey()
+        {
             for (int i = 0; i < hotkeyBinding.Count; i++)
             {
+                UnregisterHotKey(this.Handle, i);
                 RegisterHotKey(this.Handle, i, (int)hotkeyBinding[i].Hotkey.Kmod1 + (int)hotkeyBinding[i].Hotkey.Kmod2, Convert.ToInt32(hotkeyBinding[i].Hotkey.Key));
             }
+            if (!Directory.Exists(Path.GetDirectoryName(hotkeyPath)))
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(hotkeyPath));
+            }
+            File.WriteAllText(hotkeyPath, JsonConvert.SerializeObject(hotkeyBinding));
         }
 
         private void Home_Load(object sender, EventArgs e)
@@ -123,7 +79,7 @@ namespace SmartHomeWin
 
 
                 var dev = tuya.DevicesList.Where(dev => dev.Id == hotkeyBinding[id].DevId).FirstOrDefault();
-                int state = Convert.ToInt32(dev.Data.State);
+                int state = dev.Dev_type == "scene" ? 0 : Convert.ToInt32(dev.Data.State);
                 tuya.ControlDevicesAsync(hotkeyBinding[id].DevId, state ^ 1);
 
                 dev.Data.State = Convert.ToBoolean(state ^ 1);
@@ -147,7 +103,7 @@ namespace SmartHomeWin
 
             foreach (var dev in tuya.DevicesList)
             {
-                if (dev.Dev_type == "switch")
+                if (dev.Dev_type == "switch" || true)
                 {
                     ListViewItem device = new ListViewItem(dev.Name, 0);
 
@@ -155,6 +111,13 @@ namespace SmartHomeWin
                     device.SubItems.Add(dev.Dev_type);
                     device.SubItems.Add(Convert.ToInt32(dev.Data.State).ToString());
                     device.SubItems.Add(Convert.ToInt32(dev.Data.Online).ToString());
+
+                    var selectDeviceHK = hotkeyBinding.Where(hk => hk.DevId == dev.Id).FirstOrDefault();
+
+                    if (selectDeviceHK != null)
+                    {
+                        device.SubItems.Add($"{selectDeviceHK.Hotkey.Kmod1} + {selectDeviceHK.Hotkey.Kmod2} + {Enum.GetName(typeof(Keys), selectDeviceHK.Hotkey.Key)}");
+                    }
 
                     deviceListView.Items.AddRange(new ListViewItem[] { device });
                 }
@@ -165,9 +128,16 @@ namespace SmartHomeWin
         {
             if (deviceListView.SelectedItems.Count > 0)
             {
-                if (deviceListView.SelectedItems[0].SubItems[3].Text == "True")
+                if (deviceListView.SelectedItems[0].SubItems[3].Text == "1")
                 {
-                    btnOnOff.Text = "OFF";
+                    if (deviceListView.SelectedItems[0].SubItems[2].Text == "scene")
+                    {
+                        btnOnOff.Text = "TRIGGER";
+                    }
+                    else
+                    {
+                        btnOnOff.Text = "OFF";
+                    }
                 }
                 else
                 {
@@ -180,6 +150,11 @@ namespace SmartHomeWin
             {
                 btnOnOff.Text = "ON/OFF";
                 btnOnOff.Enabled = false;
+                btnBindHotKey.Enabled = false;
+            }
+            if (listening)
+            {
+                DoneBinding();
             }
         }
 
@@ -189,7 +164,7 @@ namespace SmartHomeWin
             btnOnOff.Enabled = false;
 
             string devId = deviceListView.SelectedItems[0].SubItems[1].Text;
-            int state = Convert.ToInt32(deviceListView.SelectedItems[0].SubItems[3].Text);
+            int state = deviceListView.SelectedItems[0].SubItems[2].Text == "scene" ? 0 : Convert.ToInt32(deviceListView.SelectedItems[0].SubItems[3].Text);
 
             tuya.ControlDevicesAsync(devId, state ^ 1);
             var dev = tuya.DevicesList.Where(dev => dev.Id == devId).FirstOrDefault();
@@ -198,14 +173,14 @@ namespace SmartHomeWin
 
             tuya.SaveDeviceData();
         }
-
-        public Hotkey hotkey = new Hotkey();
         public bool listening = false;
+        private Hotkey hotkey;
+
         private void BtnBindHotKey_Click(object sender, EventArgs e)
         {
             hotkey = new Hotkey();
             listening = true;
-            label1.Text = "listening...";
+            btnBindHotKey.Text = "Enter hotkey";
         }
 
         private void BtnBindHotKey_KeyDown(object sender, KeyEventArgs e)
@@ -214,40 +189,67 @@ namespace SmartHomeWin
             {
                 if (hotkey.Kmod1.ToString() == "None")
                 {
-                    hotkey.Kmod1 = (KeyModifier)Enum.Parse(typeof(KeyModifier), e.KeyCode.ToString());
-                    Debug.WriteLine("kmod1");
+                    if (Enum.IsDefined(typeof(KeyModifier), e.KeyCode.ToString()))
+                    {
+                        hotkey.Kmod1 = (KeyModifier)Enum.Parse(typeof(KeyModifier), e.KeyCode.ToString());
+                        deviceListView.SelectedItems[0].SubItems[5].Text = e.KeyCode.ToString() + " + ";
+                        Debug.WriteLine("kmod1");
+                    }
                 }
                 else if (hotkey.Kmod1.ToString() != "None" && hotkey.Kmod2.ToString() == "None" && hotkey.Kmod1.ToString() != e.KeyCode.ToString())
                 {
-                    try
+                    if (Enum.IsDefined(typeof(KeyModifier), e.KeyCode.ToString()))
                     {
                         hotkey.Kmod2 = (KeyModifier)Enum.Parse(typeof(KeyModifier), e.KeyCode.ToString());
+                        deviceListView.SelectedItems[0].SubItems[5].Text += e.KeyCode.ToString() + " + ";
                         Debug.WriteLine("kmod2");
                     }
-                    catch (Exception)
+                    else if (hotkey.Key == 0)
                     {
                         hotkey.Key = e.KeyValue;
-                        Debug.WriteLine("key");
+                        deviceListView.SelectedItems[0].SubItems[5].Text += e.KeyCode.ToString();
+                        Debug.WriteLine("2nd key");
+                        DoneBinding();
                     }
                 }
-                else if (hotkey.Kmod1.ToString() != e.KeyCode.ToString() && hotkey.Kmod2.ToString() != e.KeyCode.ToString())
+                else if (hotkey.Key == 0 && hotkey.Kmod1.ToString() != e.KeyCode.ToString() && hotkey.Kmod2.ToString() != e.KeyCode.ToString())
                 {
                     hotkey.Key = e.KeyValue;
-                    Debug.WriteLine("key");
+                    deviceListView.SelectedItems[0].SubItems[5].Text += e.KeyCode.ToString();
+                    Debug.WriteLine("3rd key");
+                    DoneBinding();
                 }
             }
         }
 
-        private void BtnBindHotKey_KeyUp(object sender, KeyEventArgs e)
-        {
-            DoneBinding();
-        }
-
         private void DoneBinding()
         {
-            btnBindHotKey.Text = $"{hotkey.Kmod1} + {hotkey.Kmod2} + {Enum.GetName(typeof(Keys), hotkey.Key)}";
+            if (hotkey.Key != 0)
+            {
+                Debug.Write("key binding for");
+                Debug.WriteLine(deviceListView.SelectedItems[0].SubItems[1].Text);
+
+                var selectDeviceHK = hotkeyBinding.Where(hk => hk.DevId == deviceListView.SelectedItems[0].SubItems[1].Text).FirstOrDefault();
+                if (selectDeviceHK != null)
+                {
+                    selectDeviceHK.Hotkey = hotkey;
+                }
+                else
+                {
+                    hotkeyBinding.Add(
+                       new HotKeyBinding
+                       {
+                           DevId = deviceListView.SelectedItems[0].SubItems[1].Text,
+                           Hotkey = hotkey
+                       });
+                }
+                RegisterHotKey();
+            }
+            else
+            {
+                Debug.WriteLine("key binding rejected");
+            }
             listening = false;
-            label1.Text = "Edit Key Bind";
         }
 
         private void Home_Resize(object sender, EventArgs e)
@@ -271,6 +273,17 @@ namespace SmartHomeWin
     {
         public string DevId { get; set; }
         public Hotkey Hotkey { get; set; }
+        public override string ToString()
+        {
+            return JsonConvert.SerializeObject(this, new JsonSerializerSettings
+            {
+                ContractResolver = new DefaultContractResolver
+                {
+                    NamingStrategy = new CamelCaseNamingStrategy()
+                },
+                Formatting = Formatting.Indented
+            });
+        }
     }
 
     public class Hotkey
