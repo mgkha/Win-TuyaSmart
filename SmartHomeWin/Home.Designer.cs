@@ -47,7 +47,8 @@
             this.menuAutoStart = new System.Windows.Forms.ToolStripMenuItem();
             this.seperator1 = new System.Windows.Forms.ToolStripSeparator();
             this.menuExit = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsmAbout = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsmHelp = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsAbout = new System.Windows.Forms.ToolStripMenuItem();
             this.btnUnbindKeys = new System.Windows.Forms.Button();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -145,7 +146,7 @@
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tsmFile,
-            this.tsmAbout});
+            this.tsmHelp});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(952, 24);
@@ -172,11 +173,10 @@
             // 
             // menuAutoStart
             // 
-            this.menuAutoStart.Checked = true;
-            this.menuAutoStart.CheckState = System.Windows.Forms.CheckState.Checked;
             this.menuAutoStart.Name = "menuAutoStart";
             this.menuAutoStart.Size = new System.Drawing.Size(182, 22);
             this.menuAutoStart.Text = "Open when pc starts";
+            this.menuAutoStart.Click += new System.EventHandler(this.MenuAutoStart_Click);
             // 
             // seperator1
             // 
@@ -188,12 +188,21 @@
             this.menuExit.Name = "menuExit";
             this.menuExit.Size = new System.Drawing.Size(182, 22);
             this.menuExit.Text = "Exit";
+            this.menuExit.Click += new System.EventHandler(this.MenuExit_Click);
             // 
-            // tsmAbout
+            // tsmHelp
             // 
-            this.tsmAbout.Name = "tsmAbout";
-            this.tsmAbout.Size = new System.Drawing.Size(52, 20);
-            this.tsmAbout.Text = "About";
+            this.tsmHelp.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.tsAbout});
+            this.tsmHelp.Name = "tsmHelp";
+            this.tsmHelp.Size = new System.Drawing.Size(44, 20);
+            this.tsmHelp.Text = "Help";
+            // 
+            // tsAbout
+            // 
+            this.tsAbout.Name = "tsAbout";
+            this.tsAbout.Size = new System.Drawing.Size(107, 22);
+            this.tsAbout.Text = "About";
             // 
             // btnUnbindKeys
             // 
@@ -222,6 +231,7 @@
             this.Name = "Home";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Smart Home Win";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Home_FormClosing);
             this.Load += new System.EventHandler(this.Home_Load);
             this.Resize += new System.EventHandler(this.Home_Resize);
             this.menuStrip1.ResumeLayout(false);
@@ -248,9 +258,10 @@
         private System.Windows.Forms.ToolStripMenuItem menuLogin;
         private System.Windows.Forms.ToolStripSeparator seperator1;
         private System.Windows.Forms.ToolStripMenuItem menuExit;
-        private System.Windows.Forms.ToolStripMenuItem tsmAbout;
+        private System.Windows.Forms.ToolStripMenuItem tsmHelp;
         private System.Windows.Forms.ToolStripMenuItem menuAutoStart;
         private System.Windows.Forms.Button btnUnbindKeys;
+        private System.Windows.Forms.ToolStripMenuItem tsAbout;
     }
 }
 
