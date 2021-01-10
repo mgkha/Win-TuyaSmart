@@ -79,12 +79,13 @@ namespace SmartHomeWin
                 KeyModifier modifier = (KeyModifier)((int)m.LParam & 0xFFFF);
                 int id = m.WParam.ToInt32();
 
-                Debug.WriteLine($"id : {id}");
-                Debug.WriteLine($"modifier : {modifier}");
-                Debug.WriteLine($"key : {key}");
+                Debug.WriteLine($"id: {id}");
+                // Debug.WriteLine($"modifier : {modifier}");
+                // Debug.WriteLine($"key : {key}");
 
 
                 var dev = Program.tuya.DevicesList.Where(dev => dev.Id == hotkeyBinding[id].DevId).FirstOrDefault();
+
                 int state = dev.Dev_type == "scene" ? 0 : Convert.ToInt32(dev.Data.State);
                 Program.tuya.ControlDevicesAsync(hotkeyBinding[id].DevId, state ^ 1);
 
@@ -96,14 +97,16 @@ namespace SmartHomeWin
 
         private void BtnRefresh_Click(object sender, EventArgs e)
         {
-            btnOnOff.Text = "ON/OFF";
-            btnOnOff.Enabled = false;
-            btnBindHotKey.Enabled = false;
             RefreshDevicesList(true);
         }
 
         private async void RefreshDevicesList(bool hardRefresh = false)
         {
+            btnOnOff.Text = "ON/OFF";
+            btnOnOff.Enabled = false;
+            btnBindHotKey.Enabled = false;
+            btnUnbindHotkey.Enabled = false;
+
             if (hardRefresh)
                 await Program.tuya.DiscoverDevices();
 
@@ -147,12 +150,15 @@ namespace SmartHomeWin
                     btnOnOff.Text = deviceListView.SelectedItems[0].SubItems[2].Text == "scene" ? "TRIGGER" : "ON";
                 btnOnOff.Enabled = true;
                 btnBindHotKey.Enabled = true;
+                var selectDeviceHK = hotkeyBinding.Where(hk => hk.DevId == deviceListView.SelectedItems[0].SubItems[1].Text).FirstOrDefault();
+                btnUnbindHotkey.Enabled = selectDeviceHK != null;
             }
             else
             {
                 btnOnOff.Text = "ON/OFF";
                 btnOnOff.Enabled = false;
                 btnBindHotKey.Enabled = false;
+                btnUnbindHotkey.Enabled = false;
             }
             if (listening)
                 DoneBinding();
@@ -298,6 +304,25 @@ namespace SmartHomeWin
             btnUnbindKeys.Enabled = false;
         }
 
+        private void BtnUnbindHotkey_Click(object sender, EventArgs e)
+        {
+            var selectDeviceHK = hotkeyBinding.Where(hk => hk.DevId == deviceListView.SelectedItems[0].SubItems[1].Text).FirstOrDefault();
+            if(selectDeviceHK != null)
+            {
+                int index = hotkeyBinding.IndexOf(selectDeviceHK);
+
+                Debug.WriteLine("index: " + index);
+
+                for (int i = 0; i < hotkeyBinding.Count; i++)
+                {
+                    UnregisterHotKey(this.Handle, i);
+                }
+                hotkeyBinding.Remove(selectDeviceHK);
+                RegisterHotKey();
+                RefreshDevicesList();
+            }
+        }
+
         private void BtnUnbindKeys_Click(object sender, EventArgs e)
         {
             var result = MessageBox.Show("Are you sure you want to remove all hotkeys?", "Unbinding Hotkeys", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
@@ -348,7 +373,6 @@ namespace SmartHomeWin
                 menuAutoStart.Checked = false;
             }
         }
-
     }
 
     public class HotKeyBinding

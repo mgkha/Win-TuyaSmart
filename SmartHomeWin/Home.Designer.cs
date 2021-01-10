@@ -50,6 +50,7 @@
             this.tsmHelp = new System.Windows.Forms.ToolStripMenuItem();
             this.tsAbout = new System.Windows.Forms.ToolStripMenuItem();
             this.btnUnbindKeys = new System.Windows.Forms.Button();
+            this.btnUnbindHotkey = new System.Windows.Forms.Button();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -207,7 +208,7 @@
             // btnUnbindKeys
             // 
             this.btnUnbindKeys.Enabled = false;
-            this.btnUnbindKeys.Location = new System.Drawing.Point(830, 196);
+            this.btnUnbindKeys.Location = new System.Drawing.Point(830, 247);
             this.btnUnbindKeys.Name = "btnUnbindKeys";
             this.btnUnbindKeys.Size = new System.Drawing.Size(100, 33);
             this.btnUnbindKeys.TabIndex = 6;
@@ -215,11 +216,23 @@
             this.btnUnbindKeys.UseVisualStyleBackColor = true;
             this.btnUnbindKeys.Click += new System.EventHandler(this.BtnUnbindKeys_Click);
             // 
+            // btnUnbindHotkey
+            // 
+            this.btnUnbindHotkey.Enabled = false;
+            this.btnUnbindHotkey.Location = new System.Drawing.Point(830, 197);
+            this.btnUnbindHotkey.Name = "btnUnbindHotkey";
+            this.btnUnbindHotkey.Size = new System.Drawing.Size(100, 33);
+            this.btnUnbindHotkey.TabIndex = 8;
+            this.btnUnbindHotkey.Text = "Unbind Hotkey";
+            this.btnUnbindHotkey.UseVisualStyleBackColor = true;
+            this.btnUnbindHotkey.Click += new System.EventHandler(this.BtnUnbindHotkey_Click);
+            // 
             // Home
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(952, 413);
+            this.Controls.Add(this.btnUnbindHotkey);
             this.Controls.Add(this.btnUnbindKeys);
             this.Controls.Add(this.btnBindHotKey);
             this.Controls.Add(this.btnOnOff);
@@ -262,6 +275,7 @@
         private System.Windows.Forms.ToolStripMenuItem menuAutoStart;
         private System.Windows.Forms.Button btnUnbindKeys;
         private System.Windows.Forms.ToolStripMenuItem tsAbout;
+        private System.Windows.Forms.Button btnUnbindHotkey;
     }
 }
 
