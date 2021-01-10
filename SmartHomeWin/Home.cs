@@ -15,6 +15,7 @@ namespace SmartHomeWin
     public partial class Home : Form
     {
         public static string hotkeyPath = Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile) + @"\tuya\hotkeys.json";
+        public static string startupPath = Environment.GetFolderPath(System.Environment.SpecialFolder.Startup) + @"\SmartHome.lnk";
 
         [DllImport("user32.dll")]
         public static extern int GetAsyncKeyState(Keys vKey);
@@ -23,7 +24,7 @@ namespace SmartHomeWin
         [DllImport("user32.dll")]
         private static extern bool UnregisterHotKey(IntPtr hWnd, int id);
 
-        private List<HotKeyBinding> hotkeyBinding;
+        private readonly List<HotKeyBinding> hotkeyBinding;
 
         private Hotkey hotkey;
         private bool listening = false;
@@ -35,6 +36,7 @@ namespace SmartHomeWin
             Program.tuya = new TuyaApi.TuyaApi();
 
             menuLogin.Text = Program.tuya.IsAuthenticated() ? "Logout" : "Login";
+            menuAutoStart.Checked = File.Exists(startupPath);
 
             try
             {
@@ -129,7 +131,7 @@ namespace SmartHomeWin
                 }
             }
 
-            if(hotkeyBinding.Count > 0)
+            if (hotkeyBinding.Count > 0)
             {
                 btnUnbindKeys.Enabled = true;
             }
@@ -304,6 +306,49 @@ namespace SmartHomeWin
                 UnregisterAllHotkeys();
             }
         }
+
+        private bool minimize = true;
+
+        private void Home_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (minimize)
+            {
+                e.Cancel = true;
+                WindowState = FormWindowState.Minimized;
+            }
+        }
+
+        private void MenuExit_Click(object sender, EventArgs e)
+        {
+            minimize = false;
+            Close();
+        }
+
+        private void CreateShortcut(string shortcutPath)
+        {
+            IWshRuntimeLibrary.WshShell shell = new IWshRuntimeLibrary.WshShell();
+
+            IWshRuntimeLibrary.IWshShortcut shortcut = (IWshRuntimeLibrary.IWshShortcut)shell.CreateShortcut(shortcutPath);
+            string appExePath = Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), Path.GetFileNameWithoutExtension(Application.ExecutablePath) + ".exe");
+            shortcut.TargetPath = appExePath;
+            shortcut.Save();
+
+        }
+
+        private void MenuAutoStart_Click(object sender, EventArgs e)
+        {
+            if (menuAutoStart.Checked == false)
+            {
+                CreateShortcut(startupPath);
+                menuAutoStart.Checked = true;
+            }
+            else
+            {
+                File.Delete(startupPath);
+                menuAutoStart.Checked = false;
+            }
+        }
+
     }
 
     public class HotKeyBinding
