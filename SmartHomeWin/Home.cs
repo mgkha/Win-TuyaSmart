@@ -23,7 +23,7 @@ namespace SmartHomeWin
         [DllImport("user32.dll")]
         private static extern bool UnregisterHotKey(IntPtr hWnd, int id);
 
-        public List<HotKeyBinding> hotkeyBinding;
+        private List<HotKeyBinding> hotkeyBinding;
 
         private Hotkey hotkey;
         private bool listening = false;

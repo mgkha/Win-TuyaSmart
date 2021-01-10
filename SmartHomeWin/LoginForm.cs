@@ -20,8 +20,7 @@ namespace SmartHomeWin
         {
             btnLogin.Enabled = false;
             string response = await Program.tuya.Login(txtEmail.Text, txtPassword.Text);
-            btnLogin.Enabled = true;
-            Debug.WriteLine(response);
+
             if (response == "success")
             {
                 DialogResult = DialogResult.OK;
@@ -31,6 +30,8 @@ namespace SmartHomeWin
             {
                 MessageBox.Show(response);
             }
+
+            btnLogin.Enabled = true;
         }
     }
 }
