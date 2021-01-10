@@ -11,6 +11,8 @@ namespace SmartHomeWin
 {
     static class Program
     {
+        public static TuyaApi.TuyaApi tuya;
+
         [STAThread]
         static void Main()
         {

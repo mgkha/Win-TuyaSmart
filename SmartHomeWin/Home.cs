@@ -14,7 +14,6 @@ namespace SmartHomeWin
 {
     public partial class Home : Form
     {
-        private readonly TuyaApi.TuyaApi tuya;
         public static string hotkeyPath = Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile) + @"\tuya\hotkeys.json";
 
         [DllImport("user32.dll")]
@@ -24,13 +23,18 @@ namespace SmartHomeWin
         [DllImport("user32.dll")]
         private static extern bool UnregisterHotKey(IntPtr hWnd, int id);
 
-        public List<HotKeyBinding> hotkeyBinding;
+        private List<HotKeyBinding> hotkeyBinding;
+
+        private Hotkey hotkey;
+        private bool listening = false;
 
         public Home()
         {
             InitializeComponent();
 
-            tuya = new TuyaApi.TuyaApi();
+            Program.tuya = new TuyaApi.TuyaApi();
+
+            menuLogin.Text = Program.tuya.IsAuthenticated() ? "Logout" : "Login";
 
             try
             {
@@ -44,17 +48,17 @@ namespace SmartHomeWin
             RegisterHotKey();
         }
 
-        public void RegisterHotKey()
+        private void RegisterHotKey()
         {
             for (int i = 0; i < hotkeyBinding.Count; i++)
             {
                 UnregisterHotKey(this.Handle, i);
                 RegisterHotKey(this.Handle, i, (int)hotkeyBinding[i].Hotkey.Kmod1 + (int)hotkeyBinding[i].Hotkey.Kmod2, Convert.ToInt32(hotkeyBinding[i].Hotkey.Key));
             }
+
             if (!Directory.Exists(Path.GetDirectoryName(hotkeyPath)))
-            {
                 Directory.CreateDirectory(Path.GetDirectoryName(hotkeyPath));
-            }
+
             File.WriteAllText(hotkeyPath, JsonConvert.SerializeObject(hotkeyBinding));
         }
 
@@ -78,13 +82,13 @@ namespace SmartHomeWin
                 Debug.WriteLine($"key : {key}");
 
 
-                var dev = tuya.DevicesList.Where(dev => dev.Id == hotkeyBinding[id].DevId).FirstOrDefault();
+                var dev = Program.tuya.DevicesList.Where(dev => dev.Id == hotkeyBinding[id].DevId).FirstOrDefault();
                 int state = dev.Dev_type == "scene" ? 0 : Convert.ToInt32(dev.Data.State);
-                tuya.ControlDevicesAsync(hotkeyBinding[id].DevId, state ^ 1);
+                Program.tuya.ControlDevicesAsync(hotkeyBinding[id].DevId, state ^ 1);
 
                 dev.Data.State = Convert.ToBoolean(state ^ 1);
                 RefreshDevicesList();
-                tuya.SaveDeviceData();
+                Program.tuya.SaveDeviceData();
             }
         }
 
@@ -99,12 +103,11 @@ namespace SmartHomeWin
         private async void RefreshDevicesList(bool hardRefresh = false)
         {
             if (hardRefresh)
-            {
-                await tuya.DiscoverDevices();
-            }
+                await Program.tuya.DiscoverDevices();
+
             deviceListView.Items.Clear();
 
-            foreach (var dev in tuya.DevicesList)
+            foreach (var dev in Program.tuya.DevicesList)
             {
                 if (dev.Dev_type == "switch" || true)
                 {
@@ -118,12 +121,17 @@ namespace SmartHomeWin
                     var selectDeviceHK = hotkeyBinding.Where(hk => hk.DevId == dev.Id).FirstOrDefault();
 
                     if (selectDeviceHK != null)
-                    {
                         device.SubItems.Add($"{selectDeviceHK.Hotkey.Kmod1} + {selectDeviceHK.Hotkey.Kmod2} + {Enum.GetName(typeof(Keys), selectDeviceHK.Hotkey.Key)}");
-                    }
+                    else
+                        device.SubItems.Add("");
 
                     deviceListView.Items.AddRange(new ListViewItem[] { device });
                 }
+            }
+
+            if(hotkeyBinding.Count > 0)
+            {
+                btnUnbindKeys.Enabled = true;
             }
         }
 
@@ -132,13 +140,9 @@ namespace SmartHomeWin
             if (deviceListView.SelectedItems.Count > 0)
             {
                 if (deviceListView.SelectedItems[0].SubItems[3].Text == "1")
-                {
                     btnOnOff.Text = deviceListView.SelectedItems[0].SubItems[2].Text == "scene" ? "TRIGGER" : "OFF";
-                }
                 else
-                {
                     btnOnOff.Text = deviceListView.SelectedItems[0].SubItems[2].Text == "scene" ? "TRIGGER" : "ON";
-                }
                 btnOnOff.Enabled = true;
                 btnBindHotKey.Enabled = true;
             }
@@ -149,9 +153,7 @@ namespace SmartHomeWin
                 btnBindHotKey.Enabled = false;
             }
             if (listening)
-            {
                 DoneBinding();
-            }
         }
 
         private void BtnOnOff_Click(object sender, EventArgs e)
@@ -162,15 +164,13 @@ namespace SmartHomeWin
             string devId = deviceListView.SelectedItems[0].SubItems[1].Text;
             int state = deviceListView.SelectedItems[0].SubItems[2].Text == "scene" ? 0 : Convert.ToInt32(deviceListView.SelectedItems[0].SubItems[3].Text);
 
-            tuya.ControlDevicesAsync(devId, state ^ 1);
-            var dev = tuya.DevicesList.Where(dev => dev.Id == devId).FirstOrDefault();
+            Program.tuya.ControlDevicesAsync(devId, state ^ 1);
+            var dev = Program.tuya.DevicesList.Where(dev => dev.Id == devId).FirstOrDefault();
             dev.Data.State = Convert.ToBoolean(state ^ 1);
             RefreshDevicesList();
 
-            tuya.SaveDeviceData();
+            Program.tuya.SaveDeviceData();
         }
-        public bool listening = false;
-        private Hotkey hotkey;
 
         private void BtnBindHotKey_Click(object sender, EventArgs e)
         {
@@ -246,6 +246,7 @@ namespace SmartHomeWin
                 Debug.WriteLine("key binding rejected");
             }
             listening = false;
+            btnBindHotKey.Text = "Bind Hotkey";
         }
 
         private void Home_Resize(object sender, EventArgs e)
@@ -264,6 +265,45 @@ namespace SmartHomeWin
             notifyIcon.Visible = false;
         }
 
+        private void MenuLogin_Click(object sender, EventArgs e)
+        {
+            if (Program.tuya.IsAuthenticated())
+            {
+                Program.tuya.Logout();
+                deviceListView.Items.Clear();
+                menuLogin.Text = "Login";
+                UnregisterAllHotkeys();
+            }
+            else
+            {
+                var result = new LoginForm().ShowDialog();
+                if (result == DialogResult.OK)
+                {
+                    RefreshDevicesList(true);
+                    menuLogin.Text = "Logout";
+                }
+            }
+        }
+        private void UnregisterAllHotkeys()
+        {
+            for (int i = 0; i < hotkeyBinding.Count; i++)
+            {
+                UnregisterHotKey(this.Handle, i);
+            }
+            hotkeyBinding.Clear();
+            File.Delete(hotkeyPath);
+            RefreshDevicesList();
+            btnUnbindKeys.Enabled = false;
+        }
+
+        private void BtnUnbindKeys_Click(object sender, EventArgs e)
+        {
+            var result = MessageBox.Show("Are you sure you want to remove all hotkeys?", "Unbinding Hotkeys", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
+            if (result == DialogResult.OK)
+            {
+                UnregisterAllHotkeys();
+            }
+        }
     }
 
     public class HotKeyBinding
