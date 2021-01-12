@@ -373,6 +373,12 @@ namespace SmartHomeWin
                 menuAutoStart.Checked = false;
             }
         }
+
+        private void MenuAbout_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("Tuya smart home app for PC by mgkha.");
+        }
+            
     }
 
     public class HotKeyBinding

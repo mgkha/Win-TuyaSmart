@@ -204,6 +204,7 @@
             this.tsAbout.Name = "tsAbout";
             this.tsAbout.Size = new System.Drawing.Size(107, 22);
             this.tsAbout.Text = "About";
+            this.tsAbout.Click += new System.EventHandler(this.MenuAbout_Click);
             // 
             // btnUnbindKeys
             // 
