@@ -3,7 +3,7 @@
 Tuya Smart Home App for Window 10
 
 ### Download
-https://github.com/mgkha/Win-TuyaSmart/releases/download/v1.0.0/SmartHomeWin.zip
+x64 build - [SmartHomeWin.zip](https://github.com/mgkha/Win-TuyaSmart/releases/download/v1.0.0/SmartHomeWin.zip)
 
 ### Release
 #### [v1.0.0](https://github.com/mgkha/Win-TuyaSmart/tree/v1.0.0) (2021-01-11)
@@ -14,3 +14,5 @@ https://github.com/mgkha/Win-TuyaSmart/releases/download/v1.0.0/SmartHomeWin.zip
  - [x] Control devices (currently supported for switches and scenes only)
  - [x] Global hotkey binding
  - [x] Auto startup when pc turn on
+
+For Tuya Api Implementation - See [TuyaApi-DLL](https://github.com/mgkha/TuyaApi-DLL)
